@@ -48,6 +48,10 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
     return labels[status] || status
   }
 
+  const getDownloadUrl = (key) => {
+    return `https://conta-colli-attachments.2d1adbdbf94425d1dbdc044779d7a7c5.r2.cloudflarestorage.com/${key}`
+  }
+
   return (
     <div className="request-detail">
       <div className="detail-header">
@@ -98,10 +102,42 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
             <h3>Allegati</h3>
             <div className="attachments-info">
               {request.attachmentsLinks && request.attachmentsLinks.length > 0 ? (
-                <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.6' }}>
+                <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8' }}>
                   {request.attachmentsLinks.map((attachment, idx) => (
-                    <li key={idx} style={{ marginBottom: '8px' }}>
-                      📎 <strong>{attachment.filename}</strong>
+                    <li key={idx} style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        📎 <strong>{attachment.filename}</strong>
+                      </div>
+                      <a 
+                        href={getDownloadUrl(attachment.key)}
+                        download={attachment.filename}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ 
+                          marginLeft: '16px', 
+                          color: '#3b82f6', 
+                          textDecoration: 'none',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          padding: '6px 12px',
+                          backgroundColor: '#dbeafe',
+                          borderRadius: '4px',
+                          border: '1px solid #93c5fd',
+                          transition: 'all 0.2s',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#bfdbfe';
+                          e.target.style.borderColor = '#60a5fa';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = '#dbeafe';
+                          e.target.style.borderColor = '#93c5fd';
+                        }}
+                      >
+                        ⬇️ Scarica
+                      </a>
                     </li>
                   ))}
                 </ul>
