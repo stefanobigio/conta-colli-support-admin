@@ -79,8 +79,37 @@ function DashboardPage({ onLogout }) {
       await loadRequests()
       
       setSelectedRequest(null)
-      alert('Richiesta aggiornata e email inviata!')
+      alert(response ? 'Richiesta aggiornata e email inviata!' : 'Richiesta aggiornata!')
     } catch (err) {
+      alert('Errore: ' + err.message)
+    }
+  }
+
+  const handleDeleteRequest = async (requestId) => {
+    try {
+      console.log('Eliminando richiesta:', requestId)
+      
+      const result = await fetch(`${WORKER_URL}/support/${requestId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer Tucano!5118'
+        }
+      })
+
+      console.log('Response status:', result.status)
+      const data = await result.json()
+      console.log('Response data:', data)
+
+      if (!result.ok) {
+        throw new Error('Errore nell\'eliminazione: ' + (data.error || 'Unknown error'))
+      }
+
+      // Rimuovi dalla lista locale
+      setRequests(requests.filter(r => r.id !== requestId))
+      setSelectedRequest(null)
+      alert('Richiesta eliminata!')
+    } catch (err) {
+      console.error('Errore:', err)
       alert('Errore: ' + err.message)
     }
   }
@@ -152,6 +181,7 @@ function DashboardPage({ onLogout }) {
             <RequestDetail
               request={selectedRequest}
               onUpdate={handleUpdateRequest}
+              onDelete={handleDeleteRequest}
               onClose={() => setSelectedRequest(null)}
             />
           ) : (
