@@ -97,7 +97,17 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
           <div className="detail-section">
             <h3>Allegati</h3>
             <div className="attachments-info">
-              📎 {request.attachmentsCount} file allegato{request.attachmentsCount > 1 ? 'i' : ''}
+              {request.attachmentsLinks && request.attachmentsLinks.length > 0 ? (
+                <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.6' }}>
+                  {request.attachmentsLinks.map((attachment, idx) => (
+                    <li key={idx} style={{ marginBottom: '8px' }}>
+                      📎 <strong>{attachment.filename}</strong>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span>📎 {request.attachmentsCount} file allegato{request.attachmentsCount > 1 ? 'i' : ''}</span>
+              )}
             </div>
           </div>
         )}
