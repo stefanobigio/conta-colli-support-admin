@@ -48,10 +48,6 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
     return labels[status] || status
   }
 
-  const getDownloadUrl = (key) => {
-    return `https://conta-colli-attachments.2d1adbdbf94425d1dbdc044779d7a7c5.r2.cloudflarestorage.com/${key}`
-  }
-
   return (
     <div className="request-detail">
       <div className="detail-header">
@@ -109,7 +105,7 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
                         📎 <strong>{attachment.filename}</strong>
                       </div>
                       <a 
-                        href={getDownloadUrl(attachment.key)}
+                        href={`https://calm-band-d150.stefanobigio.workers.dev/download/${request.id}/${attachment.filename}`}
                         download={attachment.filename}
                         target="_blank"
                         rel="noopener noreferrer"
