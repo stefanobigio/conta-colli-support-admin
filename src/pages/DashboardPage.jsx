@@ -22,19 +22,23 @@ function DashboardPage({ onLogout }) {
       setLoading(true)
       setError('')
       
-      // Prendi tutti i ticket (dovresti fare una query al database)
-      // Per ora, mostramo come collegarsi al Worker
-      const response = await fetch(`${WORKER_URL}/support/status?email=test@example.com`)
+      const response = await fetch(`${WORKER_URL}/support/all`, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer Tucano!5118'
+        }
+      })
       
       if (!response.ok) {
-        throw new Error('Errore nel caricamento richieste')
+        throw new Error(`Errore ${response.status}: ${response.statusText}`)
       }
       
       const data = await response.json()
-      setRequests(data)
+      setRequests(Array.isArray(data) ? data : [])
     } catch (err) {
       setError('Errore nel caricamento delle richieste: ' + err.message)
       console.error(err)
+      setRequests([])
     } finally {
       setLoading(false)
     }
@@ -48,13 +52,11 @@ function DashboardPage({ onLogout }) {
 
   const handleUpdateRequest = async (requestId, status, response) => {
     try {
-      const token = localStorage.getItem('adminToken')
-      
       const result = await fetch(`${WORKER_URL}/support/${requestId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer Tucano!5118`
+          'Authorization': 'Bearer Tucano!5118'
         },
         body: JSON.stringify({
           status: status,
@@ -66,12 +68,16 @@ function DashboardPage({ onLogout }) {
         throw new Error('Errore nell\'aggiornamento')
       }
 
-      // Aggiorna la lista
+      // Aggiorna la lista locale
       setRequests(requests.map(r => 
         r.id === requestId 
-          ? { ...r, status: status, response: response }
+          ? { ...r, status: status, response: response, lastUpdate: new Date().toISOString() }
           : r
       ))
+      
+      // Ricarica tutte le richieste per sincronizzare
+      await loadRequests()
+      
       setSelectedRequest(null)
       alert('Richiesta aggiornata e email inviata!')
     } catch (err) {
@@ -127,15 +133,17 @@ function DashboardPage({ onLogout }) {
             {loading && <div className="loading-text">Caricamento...</div>}
             {error && <div className="error-text">{error}</div>}
             
-            {!loading && filteredRequests.length === 0 && (
+            {!loading && !error && filteredRequests.length === 0 && (
               <div className="empty-text">Nessuna richiesta trovata</div>
             )}
 
-            <RequestsList
-              requests={filteredRequests}
-              selectedId={selectedRequest?.id}
-              onSelect={setSelectedRequest}
-            />
+            {!loading && !error && filteredRequests.length > 0 && (
+              <RequestsList
+                requests={filteredRequests}
+                selectedId={selectedRequest?.id}
+                onSelect={setSelectedRequest}
+              />
+            )}
           </div>
         </div>
 
