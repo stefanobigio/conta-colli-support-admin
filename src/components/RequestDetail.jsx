@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import './RequestDetail.css'
 
-function RequestDetail({ request, onUpdate, onClose }) {
+function RequestDetail({ request, onUpdate, onClose, onDelete }) {
   const [status, setStatus] = useState(request.status)
   const [response, setResponse] = useState(request.response || '')
   const [loading, setLoading] = useState(false)
@@ -14,6 +14,17 @@ function RequestDetail({ request, onUpdate, onClose }) {
       await onUpdate(request.id, status, response)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (window.confirm('Sei sicuro di voler eliminare questa richiesta? Non sarà possibile recuperarla.')) {
+      setLoading(true)
+      try {
+        await onDelete(request.id)
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -119,16 +130,26 @@ function RequestDetail({ request, onUpdate, onClose }) {
               rows="6"
               disabled={loading}
             />
-            <small>Questa risposta verrà inviata via email all'utente</small>
+            <small>Lascia vuoto se non vuoi inviare risposta (solo cambio stato)</small>
           </div>
 
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={loading || !response.trim()}
-          >
-            {loading ? 'Invio in corso...' : '✉️ Invia Risposta'}
-          </button>
+          <div className="form-buttons">
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={loading}
+            >
+              {loading ? 'Aggiornamento in corso...' : '✉️ Aggiorna'}
+            </button>
+            <button
+              type="button"
+              className="delete-button"
+              onClick={handleDelete}
+              disabled={loading}
+            >
+              🗑️ Elimina
+            </button>
+          </div>
         </form>
       </div>
     </div>
