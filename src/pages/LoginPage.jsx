@@ -16,7 +16,7 @@ function LoginPage({ onLogin }) {
     // Simuliamo un piccolo delay per dare feedback visivo
     setTimeout(() => {
       if (password === ADMIN_PASSWORD) {
-        onLogin('admin-token-' + Date.now())
+        onLogin(password)  // ✅ CORRETTO: usa la password inserita, non genera token casuale
       } else {
         setError('Password non corretta')
         setPassword('')
