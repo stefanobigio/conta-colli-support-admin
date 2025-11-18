@@ -6,19 +6,19 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
   const [response, setResponse] = useState(request.response || '')
   const [loading, setLoading] = useState(false)
   
-  // ✅ NUOVO: State per chat
+  // ✅ State per chat
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [sendingMessage, setSendingMessage] = useState(false)
   const messagesEndRef = useRef(null)
 
-  // ✅ NUOVO: Carica messaggi all'apertura
+  // ✅ Carica messaggi all'apertura
   useEffect(() => {
     loadMessages()
   }, [request.id])
 
-  // ✅ NUOVO: Auto-scroll quando arrivano nuovi messaggi
+  // ✅ Auto-scroll quando arrivano nuovi messaggi
   useEffect(() => {
     scrollToBottom()
   }, [messages])
@@ -27,32 +27,58 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
     setLoadingMessages(true)
     try {
       const token = localStorage.getItem('adminToken')
+      console.log('🔑 Token recuperato:', token ? 'OK' : 'MANCANTE')
+      
+      if (!token) {
+        console.error('❌ Token admin non trovato!')
+        return
+      }
+      
       const response = await fetch(
         `https://calm-band-d150.stefanobigio.workers.dev/support/${request.id}/messages`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         }
       )
       
+      console.log('📡 Risposta loadMessages:', response.status)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ Messaggi caricati:', data.length)
         setMessages(data)
+      } else {
+        console.error('❌ Errore caricamento messaggi:', response.status)
       }
     } catch (error) {
-      console.error('Errore caricamento messaggi:', error)
+      console.error('❌ Errore caricamento messaggi:', error)
     } finally {
       setLoadingMessages(false)
     }
   }
 
   const sendMessage = async () => {
-    if (!newMessage.trim()) return
+    if (!newMessage.trim()) {
+      console.log('⚠️ Messaggio vuoto, non invio')
+      return
+    }
     
+    console.log('📤 Invio messaggio:', newMessage.trim())
     setSendingMessage(true)
+    
     try {
       const token = localStorage.getItem('adminToken')
+      console.log('🔑 Token per invio:', token ? 'OK' : 'MANCANTE')
+      
+      if (!token) {
+        console.error('❌ Token admin non trovato!')
+        alert('Errore: token admin non trovato. Prova a fare logout e login.')
+        return
+      }
+      
       const response = await fetch(
         `https://calm-band-d150.stefanobigio.workers.dev/support/${request.id}/messages`,
         {
@@ -69,12 +95,19 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
         }
       )
 
+      console.log('📡 Risposta sendMessage:', response.status)
+
       if (response.ok) {
+        console.log('✅ Messaggio inviato con successo')
         setNewMessage('')
         await loadMessages()
+      } else {
+        const errorData = await response.text()
+        console.error('❌ Errore invio messaggio:', response.status, errorData)
+        alert(`Errore nell'invio del messaggio: ${response.status}`)
       }
     } catch (error) {
-      console.error('Errore invio messaggio:', error)
+      console.error('❌ Errore invio messaggio:', error)
       alert('Errore nell\'invio del messaggio')
     } finally {
       setSendingMessage(false)
@@ -186,7 +219,7 @@ function RequestDetail({ request, onUpdate, onClose, onDelete }) {
           </div>
         </div>
 
-        {/* ✅ NUOVO: Sezione Chat */}
+        {/* ✅ Sezione Chat */}
         <div className="detail-section chat-section">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ margin: 0 }}>💬 Conversazione</h3>
